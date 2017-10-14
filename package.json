@@ -1,0 +1,46 @@
+{
+    "name": "google-fonts",
+    "displayName": "Google Fonts",
+    "description": "Allows you to browse and insert Google Fonts <link> or @import !",
+    "version": "0.0.1",
+    "publisher": "Lior Chamla",
+    "engines": {
+        "vscode": "^1.17.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:extension.insertLink",
+        "onCommand:extension.insertImport"
+    ],
+    "main": "./out/extension",
+    "contributes": {
+        "commands": [
+            {
+                "command": "extension.insertLink",
+                "title": "Google Fonts: Insert <link>"
+            },
+            {
+                "command": "extension.insertImport",
+                "title": "Google Fonts: Insert CSS @import"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "typescript": "^2.5.3",
+        "vscode": "^1.1.5",
+        "@types/node": "^7.0.43",
+        "@types/mocha": "^2.2.42"
+    },
+    "dependencies": {
+        "node-fetch": "^1.7.3"
+    }
+}
