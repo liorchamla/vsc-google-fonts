@@ -59,9 +59,9 @@ function createGoogleFontURL(font) {
     // Adding the font name
     fontUrl.push(font.family.replace(/ /g, '+'));
     // Adding font variants
-    if (font.variants.includes('italic')) {
+    if(font.variants){
         fontUrl.push(':');
-        fontUrl.push('italic');
+        fontUrl.push(font.variants.join(','));
     }
     // Creating the final URL
     return fontUrl.join('');
