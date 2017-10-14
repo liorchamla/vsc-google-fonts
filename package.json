@@ -3,7 +3,8 @@
     "displayName": "Google Fonts",
     "description": "Allows you to browse and insert Google Fonts <link> or @import !",
     "version": "0.0.1",
-    "publisher": "Lior Chamla",
+    "publisher": "lior-chamla",
+    "repository": "https://github.com/liorchamla/vsc-google-fonts",
     "engines": {
         "vscode": "^1.17.0"
     },
