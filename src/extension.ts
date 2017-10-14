@@ -3,27 +3,6 @@
 import * as vscode from 'vscode';
 import fetch from 'node-fetch';
 
-/**
- * Fetch Google Fonts API to find fonts, sorted by trending, then returns an array of displayable options in the vscode.window.showQuickPick
- * Items are also holding the details from the font in order to use them later, after the user picked a font
- */
-async function fetchFonts() {
-    return await fetch('https://www.googleapis.com/webfonts/v1/webfonts?sort=trending&key=AIzaSyBVwVbN-QhwcaSToxnk1zCEpLuoNXBtFdo')
-        .then(response => response.json())
-        .then(json => {
-            return json.items.map(item => {
-                return {
-                    label: `${item.family} (${item.category})`,
-                    description: item.variants.join(', '),
-                    details: item
-                }
-            })
-        });
-}
-
-// Holds the Google Fonts list :
-const fontsOptions = fetchFonts();
-
 // Holds the pick options for the user :
 const pickOptions = {
     matchOnDescription: true,
@@ -67,20 +46,33 @@ function createGoogleFontURL(font) {
     return fontUrl.join('');
 }
 
+
 /**
  * Manage the possibility to insert a <link href=".." /> inside the editor
  */
 function insertFontLink() {
-    // Let the user choose !
-    vscode.window.showQuickPick(fontsOptions, pickOptions).then(function (item) {
-        // Holds the details of the font (name, subsets, variants, etc)
-        const font = item.details;
+    /**
+     * Fetch Google Fonts API to find fonts, sorted by trending, then returns an array of displayable options in the vscode.window.showQuickPick
+     * Items are also holding the details from the font in order to use them later, after the user picked a font
+     */
+    fetch('https://www.googleapis.com/webfonts/v1/webfonts?sort=trending&key=AIzaSyBVwVbN-QhwcaSToxnk1zCEpLuoNXBtFdo')
+    .then(response => response.json())
+    .then(json => {
 
-        // Creating the <link> markup
-        const snippet = `<link href="${createGoogleFontURL(font)}" rel="stylesheet" />`;
-
-        // Inserting the link markup inside the editor
-        insertText(snippet);
+        const fontsOptions = json.items;
+    
+        // Let the user choose !
+        vscode.window.showQuickPick(fontsOptions.map(item => item.family), pickOptions).then(function (family) {
+            
+            // Holds the details of the font (name, subsets, variants, etc)
+            const font = fontsOptions.find(item => item.family == family);
+    
+            // Creating the <link> markup
+            const snippet = `<link href="${createGoogleFontURL(font)}" rel="stylesheet" />`;
+    
+            // Inserting the link markup inside the editor
+            insertText(snippet);
+        });
     });
 }
 
@@ -88,14 +80,27 @@ function insertFontLink() {
  * Manages the possibility to insert a @import url(..) inside the editor
  */
 function insertFontCssImport() {
-    // Let the user choose !
-    vscode.window.showQuickPick(fontsOptions, pickOptions).then(function (item) {
-        // Holds the details of the font (name, subsets, variants, etc)
-        const font = item.details;
-        // Creating the @import url(...) snippet
-        const snippet = `@import url(${createGoogleFontURL(font)});`;
-        // Inserting the @import inside the editor
-        insertText(snippet);
+    /**
+     * Fetch Google Fonts API to find fonts, sorted by trending, then returns an array of displayable options in the vscode.window.showQuickPick
+     * Items are also holding the details from the font in order to use them later, after the user picked a font
+     */
+    fetch('https://www.googleapis.com/webfonts/v1/webfonts?sort=trending&key=AIzaSyBVwVbN-QhwcaSToxnk1zCEpLuoNXBtFdo')
+    .then(response => response.json())
+    .then(json => {
+        
+        const fontsOptions = json.items;
+        // Let the user choose !
+        vscode.window.showQuickPick(fontsOptions.map(item => item.family), pickOptions).then(function (family) {
+            
+            // Holds the details of the font (name, subsets, variants, etc)
+            const font = fontsOptions.find(item => item.family == family);
+    
+            // Creating the @import url(...) snippet
+            const snippet = `@import url(${createGoogleFontURL(font)});`;
+    
+            // Inserting the @import inside the editor
+            insertText(snippet);
+        });
     });
 }
 
@@ -120,7 +125,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         insertFontCssImport();
-    })
+    });
 
     // Adding our commands to the context 
     context.subscriptions.push(insertLink);
