@@ -36,7 +36,7 @@ async function insertFontLink() {
   // Creating the <link> markup
   const snippet = `<link href="${GoogleApi.generateUrl(
     font
-  )}" rel="stylesheet" />`;
+  )}&display=swap" rel="stylesheet" />`;
 
   // Inserting the link markup inside the editor
   insertText(snippet);
@@ -50,7 +50,7 @@ async function insertFontCssImport() {
   const font = await getGoogleFontFamilyItem();
 
   // Creating the @import url(...) snippet
-  const snippet = `@import url(${GoogleApi.generateUrl(font)});`;
+  const snippet = `@import url(${GoogleApi.generateUrl(font)}&display=swap);`;
 
   // Inserting the @import inside the editor
   insertText(snippet);
