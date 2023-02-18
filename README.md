@@ -6,7 +6,7 @@ Use Google Fonts with ease bro !
 
 ## Features
 
-### Inserting a <link href=".."> for a chosen Google Font !
+### Inserting a &lt;link href=".."&gt; for a chosen Google Font !
 
 You can easily browse Google Fonts and create a <link href> for it !
 
