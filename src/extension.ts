@@ -124,6 +124,30 @@ export async function activate(context: vscode.ExtensionContext) {
 			panel.webview.onDidReceiveMessage(message => {
 				if (message.command === 'scroll') {
 					loadVisibleItems(panel, fontsOptions);
+				} else if (message.command === 'copyImport') {
+					vscode.env.clipboard.writeText(
+						`@import url(${GoogleApi.generateUrl(
+							fontsOptions.find(
+								(item: GoogleFontFamily) => item.family == message.font,
+							),
+						)}&display=swap);`,
+					);
+
+					vscode.window.showInformationMessage(
+						'@import code of the ' + message.font + ' font has been copied !',
+					);
+				} else if (message.command === 'copyLink') {
+					vscode.env.clipboard.writeText(
+						`<link href="${GoogleApi.generateUrl(
+							fontsOptions.find(
+								(item: GoogleFontFamily) => item.family == message.font,
+							),
+						)}&display=swap" rel="stylesheet" />`,
+					);
+
+					vscode.window.showInformationMessage(
+						'<link> code of the ' + message.font + ' font has been copied !',
+					);
 				}
 			});
 		},
@@ -169,11 +193,14 @@ function GenerateFontDiv(font) {
 	const buttonsStyle = `display: flex; margin: 0 10px; align-items: center;`;
 	const buttonStyle = `cursor: pointer; margin: 0 5px;`;
 
+	const importOnClick = `vscode.postMessage({ command: 'copyImport', font:'${font.family}'})`;
+	const linkOnClick = `vscode.postMessage({ command: 'copyLink', font:'${font.family}' })`;
+
 	return `<div style="${divStyle}">
     <p style="${titleStyle}">${font.family}</p>
     <div style="${buttonsStyle}">
-      <p style="${buttonStyle}">@import</p>
-      <p style="${buttonStyle}" class="link-text"></p>
+      <p style="${buttonStyle}" onClick="${importOnClick}">@import</p>
+      <p style="${buttonStyle}" class="link-text" onClick="${linkOnClick}"></p>
     </div>
   </div>\n`;
 }
