@@ -11,6 +11,10 @@ const pickOptions = {
 	placeHolder: 'Type Google Font name',
 };
 
+let webview;
+let loadedItems = 0;
+const chunkSize = 50;
+
 /**
  * Allows to insert any text inside the editor
  * @param text The text you want to insert in the editor at the position where the cursor is
@@ -110,12 +114,19 @@ export async function activate(context: vscode.ExtensionContext) {
 	let browserFonts = vscode.commands.registerCommand(
 		'extension.browseFonts',
 		() => {
+			if (webview) {
+				webview.reveal(vscode.ViewColumn.Two);
+				return;
+			}
+
 			const panel = vscode.window.createWebviewPanel(
 				'browseFonts',
 				'Browse Fonts',
 				vscode.ViewColumn.Two,
 				{ enableScripts: true },
 			);
+
+			webview = panel;
 
 			panel.webview.html = getBrowseFontHtml();
 
@@ -172,6 +183,16 @@ export async function activate(context: vscode.ExtensionContext) {
 					}
 				}
 			});
+
+			panel.onDidDispose(() => {
+				webview = null;
+				loadedItems = 0;
+			});
+
+			panel.onDidChangeViewState(e => {
+				loadedItems = 0;
+				loadVisibleItems(panel, fontsOptions);
+			});
 		},
 	);
 
@@ -180,9 +201,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(insertImport);
 	context.subscriptions.push(browserFonts);
 }
-
-let loadedItems = 0;
-const chunkSize = 50;
 
 /**
  * Generate a new list of items
@@ -306,7 +324,6 @@ function getBrowseFontHtml() {
         Array.from(document.getElementsByClassName("link-text")).forEach(e => e.innerText = "<link>")
       }
 
-      console.log(searchInput)
       searchInput.onkeydown = function(e){
         if(e.key == "Enter"){
           style.textCotent = ""
