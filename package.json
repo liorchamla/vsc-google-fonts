@@ -25,6 +25,10 @@
             {
                 "command": "extension.insertImport",
                 "title": "Google Fonts: Insert CSS @import"
+            },
+            {
+                "command": "extension.browseFonts",
+                "title": "Google Fonts : Browse Fonts"
             }
         ]
     },
@@ -40,7 +44,7 @@
         "@types/node": "^7.0.43",
         "@types/node-fetch": "^2.5.3",
         "typescript": "^2.5.3",
-        "vscode": "^1.1.5"
+        "vscode": "^1.1.37"
     },
     "dependencies": {
         "node-fetch": "^1.7.3"
