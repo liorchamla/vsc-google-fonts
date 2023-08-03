@@ -148,6 +148,28 @@ export async function activate(context: vscode.ExtensionContext) {
 					vscode.window.showInformationMessage(
 						'<link> code of the ' + message.font + ' font has been copied !',
 					);
+				} else if (message.command === 'searchFont') {
+					if (message.query != '') {
+						const fonts = fontsOptions.filter((item: GoogleFontFamily) =>
+							item.family.toLowerCase().startsWith(message.query.toLowerCase()),
+						);
+
+						let bodyContent = '';
+						let cssContent = '';
+
+						fonts.forEach(font => {
+							bodyContent += GenerateFontDiv(font);
+							cssContent += `@import url(${GoogleApi.generateUrl(
+								font,
+							)}&display=swap);\n`;
+						});
+
+						panel.webview.postMessage({
+							command: 'searchResult',
+							bodyContent,
+							cssContent,
+						});
+					}
 				}
 			});
 		},
@@ -212,13 +234,48 @@ function getBrowseFontHtml() {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Browse Fonts</title>
+        <style>
+          .vscode-input {
+            border: 1px solid var(--vscode-input-border);
+            background: var(--vscode-input-background);
+            color: var(--vscode-input-foreground);
+            border-radius: 3px;
+            padding: 3px;
+            display: inline-block;
+          }
+
+          .vscode-input input {
+            border: none;
+            background: transparent;
+            color: var(--vscode-input-foreground);
+            font-size: 13px;
+            outline: none;
+            width: 100%;
+          }
+        </style>
     </head>
     <body>
+      <div id="search" style="display: none; padding: 10px;">
+        <div style="display:flex; align-items: center;">
+          <p>Search Font : </p>
+          <div class="vscode-input" style="margin: 0 5px; height: 20px">
+            <input data-vscode-context='{"webviewSection": "editor"}' type="text" id="search-input" placeholder="Search font here..."/>
+          </div>
+        </div>
+        <div id="search-result"></div>
+      </div>
     </body>
     <script>
       const vscode = acquireVsCodeApi();
       const style = document.createElement("style")
       style.type = 'text/css';
+
+      const fontsDiv = document.createElement("div")
+      document.body.appendChild(fontsDiv)
+
+      const searchDiv = document.getElementById("search")
+      const searchInput = document.getElementById("search-input")
+      const searchResult = document.getElementById("search-result")
 
       let cssContent = ''
 
@@ -228,18 +285,46 @@ function getBrowseFontHtml() {
          vscode.postMessage({ command: 'scroll' });
         }
       });
+
       window.addEventListener('message', event => {
         const message = event.data;
         switch (message.command) {
           case 'addContent':
             style.textContent += message.cssContent
-            document.body.innerHTML += message.bodyContent
+            fontsDiv.innerHTML += message.bodyContent
             UpdateLinkText()
+            break;
+          case 'searchResult':
+            style.textContent = message.cssContent
+            searchResult.innerHTML = message.bodyContent
+            UpdateLinkText()
+            break;
         }
       });
 
       function UpdateLinkText(){
         Array.from(document.getElementsByClassName("link-text")).forEach(e => e.innerText = "<link>")
+      }
+
+      console.log(searchInput)
+      searchInput.onkeydown = function(e){
+        if(e.key == "Enter"){
+          style.textCotent = ""
+          searchResult.innerHTML = "Loading..."
+          vscode.postMessage({ command: 'searchFont', query: e.target.value });
+        }
+      }
+
+      window.onkeydown = function(e){
+        if(e.keyCode == 70 && e.ctrlKey){
+          searchDiv.style.display = 'block'
+          fontsDiv.style.display = 'none'
+          cssContent = style.textContent
+        }else if(e.key == "Escape"){
+          searchDiv.style.display = 'none'
+          fontsDiv.style.display = 'block'
+          style.textContent = cssContent
+        }
       }
 
       document.head.appendChild(style)
